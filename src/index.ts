@@ -9,13 +9,15 @@ export interface IMakeGraphqlResponce {
 
 export interface IMakeGraphqlFetch {
     // abort request
-    cancel: () => {};
+    cancel: () => void;
     // abort request
-    abort: () => {};
+    abort: () => void;
     // adding query
     query: (queryString: string, variables?: any, tag?: string) => IMakeGraphqlFetch;
     // send request
     send: (tag?: string) => Promise<IMakeGraphqlResponce>;
+    // run callback thel fetch is loaded
+    loaded: (callback: (result?: boolean) => void) => void;
 }
 
 interface IQueueItemPrivate {
@@ -25,6 +27,9 @@ interface IQueueItemPrivate {
     sended: boolean;
 }
 
+interface IMakeOptions {
+    
+}
 
 /**
  * Making object for working with requests
@@ -60,6 +65,9 @@ MakeGraphqlFetch.prototype.send = function (tag?: string) {
             }
         })
         .then((data) => {
+            if (typeof this._options.prepare === 'function') {
+                data = this._options.prepare(data);
+            }
             Object.assign(this._results, data);
             return data;
         });
